@@ -26,12 +26,7 @@ func (e *NotFoundError) Error() string {
 	return fmt.Sprintf("%s not found: %s", e.Entity, e.ID)
 }
 
-func (e *NotFoundError) Unwrap() error {
-	if e.Entity == "" || e.ID == "" {
-		return nil
-	}
-	return fmt.Errorf("%v", ErrNotFound)
-}
+func (e *NotFoundError) Unwrap() error { return ErrNotFound }
 
 // NewNotFoundError creates a NotFoundError.
 func NewNotFoundError(entity, id string) *NotFoundError {

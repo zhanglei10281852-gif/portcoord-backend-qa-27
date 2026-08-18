@@ -13,9 +13,6 @@ import (
 func writeError(w http.ResponseWriter, r *http.Request, err error) {
 	code := apperr.AsCode(err)
 	status := httpStatusForCode(code)
-	if code == apperr.CodeNotFound && !errors.Is(err, domain.ErrNotFound) {
-		status = http.StatusInternalServerError
-	}
 
 	resp := ErrorResponse{
 		Error:     err.Error(),
