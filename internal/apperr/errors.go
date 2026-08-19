@@ -3,6 +3,8 @@ package apperr
 import (
 	"errors"
 	"fmt"
+
+	"portcoord/internal/domain"
 )
 
 // Code is a machine-readable error code for API responses.
@@ -39,6 +41,33 @@ func (e *Error) Error() string {
 
 func (e *Error) Unwrap() error {
 	return e.Cause
+}
+
+// Is bridges the code-based and sentinel-based error identification systems.
+// A *Error whose Code corresponds to a domain sentinel reports a match for
+// that sentinel, so callers across the storage, domain, and HTTP layers can
+// identify a condition uniformly via errors.Is(err, domain.ErrNotFound) even
+// when the error was constructed through apperr.NotFound (which keeps its
+// Cause free of the sentinel to avoid duplicating the domain message). This
+// is what lets the HTTP layer trust a CodeNotFound as a genuine 404.
+func (e *Error) Is(target error) bool {
+	switch target {
+	case domain.ErrNotFound:
+		return e.Code == CodeNotFound
+	case domain.ErrConflict:
+		return e.Code == CodeConflict
+	case domain.ErrInvalidState:
+		return e.Code == CodeInvalidState
+	case domain.ErrQuotaExceeded:
+		return e.Code == CodeQuotaExceeded
+	case domain.ErrDuplicate:
+		return e.Code == CodeDuplicate
+	case domain.ErrLeaseExpired:
+		return e.Code == CodeLeaseExpired
+	case domain.ErrPreempted:
+		return e.Code == CodePreempted
+	}
+	return false
 }
 
 // New creates a new error without a cause.

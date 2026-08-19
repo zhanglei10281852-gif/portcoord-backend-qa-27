@@ -27,10 +27,10 @@ func (e *NotFoundError) Error() string {
 }
 
 func (e *NotFoundError) Unwrap() error {
-	if e.Entity == "" || e.ID == "" {
-		return nil
-	}
-	return fmt.Errorf("%v", ErrNotFound)
+	// Always unwrap to the shared sentinel so callers can identify a
+	// not-found condition through errors.Is across package boundaries
+	// regardless of whether the entity or id was populated at the call site.
+	return ErrNotFound
 }
 
 // NewNotFoundError creates a NotFoundError.
